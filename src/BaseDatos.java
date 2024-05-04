@@ -18,7 +18,6 @@ public class BaseDatos {
         try {
             Properties p =  new Properties();
             p.load(new FileReader(rutaFicheroConfiguracion));
-            // jdbc:mariadb://localhost:3306/test
             conexion = DriverManager.getConnection("jdbc:" +
                     p.getProperty("tiposervidor") + "://"+ p.getProperty("servidor")+":" + p.getProperty("puerto") +
                     "/"+p.getProperty("basedatos"), p.getProperty("usuario"), p.getProperty("contrasena"));
@@ -62,20 +61,15 @@ public class BaseDatos {
         }
     }
 
-    public boolean crearTabla(String nombreTabla) {
+    public boolean crearTabla(String sql) {
         try {
-            conexion.createStatement().execute("CREATE TABLE " + nombreTabla + " (" +
-                    "id INT NOT NULL AUTO_INCREMENT PRIMARY KEY, " +
-                    "nombre VARCHAR(50), " +
-                    "descripcion VARCHAR(200), " +
-                    "cuando_completada DATETIME, " +
-                    "completada BOOLEAN DEFAULT FALSE, " +
-                    "creada DATETIME DEFAULT CURRENT_TIMESTAMP)");
+            conexion.createStatement().execute(sql);
             return true;
         } catch (SQLException e) {
             return false;
         }
     }
+
     public boolean comprobarSiExisteTabla(String nombreTabla) {
         try {
             Statement statement = conexion.createStatement();
@@ -98,14 +92,38 @@ public class BaseDatos {
         }
     }
 
-    public void insertar(String nombreTarea,String descripcionTarea) {
+    public boolean insertar(String sql,String nombre,String usuario,String contrasena) {
         try {
-            PreparedStatement preparedStatement = conexion.prepareStatement("INSERT INTO tarea (nombre, descripcion) VALUES (?, ?)");
-            preparedStatement.setString(1, nombreTarea);
-            preparedStatement.setString(2, descripcionTarea);
-            preparedStatement.execute();
+            PreparedStatement preparedStatement = conexion.prepareStatement(sql);
+            preparedStatement.setString(1, nombre);
+            preparedStatement.setString(2, usuario);
+            preparedStatement.setString(3, contrasena);
+            if (!preparedStatement.execute()) {
+                return true;
+            } else {
+                return false;
+            }
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            return false;
+        }
+    }
+
+    public boolean verificarUsuario(String sql, String usuario) {
+        try {
+            PreparedStatement preparedStatement = conexion.prepareStatement(sql);
+            preparedStatement.setString(1, usuario);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                if (resultSet.getInt(1) > 0) {
+                    return true;
+                } else {
+                    return false;
+                }
+            } else {
+                return false;
+            }
+        } catch (SQLException e) {
+            return false;
         }
     }
 
