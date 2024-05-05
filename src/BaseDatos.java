@@ -127,6 +127,45 @@ public class BaseDatos {
         }
     }
 
+    public boolean verificarContrasena(String sql, String usuario, String contrasena) {
+        try {
+            PreparedStatement preparedStatement = this.conexion.prepareStatement(sql);
+            preparedStatement.setString(1, usuario);
+            preparedStatement.setString(2, contrasena);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                return resultSet.getInt(1) > 0;
+            } else {
+                return false;
+            }
+        } catch (SQLException var6) {
+            return false;
+        }
+    }
+
+    public int obtenerIdUsuario(String sql, String usuario, String contrasena) {
+        try {
+            PreparedStatement preparedStatement = this.conexion.prepareStatement(sql);
+            preparedStatement.setString(1, usuario);
+            preparedStatement.setString(2, contrasena);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            return resultSet.next() ? resultSet.getInt(1) : -1;
+        } catch (SQLException var6) {
+            return -1;
+        }
+    }
+
+    public String obtenerContrasenaEncriptada(String sql, String usuario) {
+        try {
+            PreparedStatement preparedStatement = this.conexion.prepareStatement(sql);
+            preparedStatement.setString(1, usuario);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            return resultSet.next() ? resultSet.getString(1) : "";
+        } catch (SQLException var5) {
+            return "";
+        }
+    }
+
 
     public void actualizar() {
 
